@@ -1,0 +1,307 @@
+alias: Alexa - Custom Skill - Command Center
+description: >-
+  Stores the Echo deviceId when Webhook is called and triggers scripts
+  associated with intents.
+triggers:
+  - webhook_id: "secret_webhook_id"
+    allowed_methods:
+      - POST
+      - PUT
+      - GET
+    local_only: true
+    trigger: webhook
+conditions: []
+actions:
+  - action: persistent_notification.create
+    metadata: {}
+    data:
+      title: Webhook Data
+      message: "{{ trigger.json }}"
+    enabled: false
+  - variables:
+      device_id: >
+        {% if trigger.json.context is defined and trigger.json.context.System is
+        defined %}
+          {{ trigger.json.context.System.device.deviceId }}
+        {% else %}
+          {{ states('input_text.alexa_last_device') }}
+        {% endif %}
+      user_id: "{{ trigger.json.context.System.user.userId }}"
+    enabled: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "HouseStatusIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_house_status_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "DoorStatusIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_door_status_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "WindowStatusIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_window_status_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "LaundryStatusIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_laundry_status_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "WasherStatusIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_washer_status_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "DryerStatusIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_dryer_status_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "FamilyLocationIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_family_location_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "DadLocationIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_dad_s_location_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "MomLocationIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_mom_s_location_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "KidLocationIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_emma_s_location_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "GasPriceIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.announce_lowest_local_gas_price_command_center
+            data: {}
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "AddTodoItemIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.add_shopping_item_command_center
+            data:
+              payload: "{{ trigger.json }}"
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "RemoveTodoItemIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.remove_item_from_shopping_list_command_center
+            data:
+              payload: "{{ trigger.json }}"
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "AddTodoTaskIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.add_task_to_task_list_command_center
+            data:
+              payload: "{{ trigger.json }}"
+      - conditions:
+          - condition: template
+            value_template: |
+              {{ trigger.json.request.intent.name == "RemoveTodoTaskIntent" }}
+            enabled: true
+        sequence:
+          - data:
+              entity_id: input_text.alexa_last_device
+              value: "{{ device_id }}"
+            action: input_text.set_value
+            enabled: true
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+          - action: script.remove_task_from_task_list_command_center
+            data:
+              payload: "{{ trigger.json }}"
+mode: queued
+max: 10
