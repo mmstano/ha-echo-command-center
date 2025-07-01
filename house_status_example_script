@@ -1,0 +1,96 @@
+alias: Announce House Status (Command Center)
+description: >-
+  Announces window, door, garage, and thermostat status automatically to the
+  Echo you spoke to.
+mode: single
+fields: {}
+sequence:
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+      windows_to_check:
+        - binary_sensor.living_room_window_1_sensor
+        - binary_sensor.living_room_window_2
+        - binary_sensor.living_room_window_3
+        - binary_sensor.dining_room_window_1
+        - binary_sensor.dining_room_window_2
+        - binary_sensor.kitchen_window
+        - binary_sensor.bedroom_1_window_sensor
+        - binary_sensor.bedroom_2_1st_window
+        - binary_sensor.bedroom_2_2nd_window
+      doors_to_check:
+        - binary_sensor.front_door
+        - binary_sensor.family_room_door
+        - binary_sensor.sunroom
+        - binary_sensor.basement
+        - binary_sensor.refrigerator_door
+        - binary_sensor.garage_freezer_contact_sensor_contact
+        - binary_sensor.dryer_door_contact
+      open_windows: >
+        {% set open = windows_to_check | select('is_state', 'on') |
+        map('device_attr', 'name') | list %} {{ open }}
+      open_doors: >
+        {% set open = doors_to_check | select('is_state', 'on') |
+        map('device_attr', 'name') | list %} {{ open }}
+      garage_door_entity: cover.overhead_door
+      garage_door_state: "{{ states(garage_door_entity) }}"
+      thermostat_entity: climate.thermostat
+      thermostat_state: "{{ states(thermostat_entity) }}"
+      current_temp: "{{ state_attr(thermostat_entity, 'current_temperature') }}"
+      target_temp: |-
+        {% if state_attr(thermostat_entity, 'temperature') %}
+          {{ state_attr(thermostat_entity, 'temperature') }}
+        {% elif state_attr(thermostat_entity, 'target_temp_low') and
+                state_attr(thermostat_entity, 'target_temp_high') %}
+          {{ state_attr(thermostat_entity, 'target_temp_low') }} to {{ state_attr(thermostat_entity, 'target_temp_high') }}
+        {% else %}
+          unknown
+        {% endif %}
+  - variables:
+      window_message: |-
+        {% if open_windows | length == 1 %}
+          The following window is open: {{ open_windows[0] }}.
+        {% elif open_windows %}
+          The following windows are open: {{ open_windows | join(", ") }}.
+        {% else %}
+          All windows are currently closed.
+        {% endif %}
+      door_message: |-
+        {% if open_doors | length == 1 %}
+          The following door is open: {{ open_doors[0] }}.
+        {% elif open_doors %}
+          The following doors are open: {{ open_doors | join(", ") }}.
+        {% else %}
+          All doors are currently closed.
+        {% endif %}
+      garage_message: |-
+        {% if garage_door_state == 'open' %}
+          The garage door is open.
+        {% elif garage_door_state == 'closed' %}
+          The garage door is closed.
+        {% else %}
+          The garage door status is currently unknown.
+        {% endif %}
+      thermostat_message: |-
+        {% if thermostat_state not in ['unavailable', 'unknown'] %}
+          The thermostat is set to {{ thermostat_state | capitalize }}.
+          The current temperature is {{ current_temp }} degrees.
+          {% if thermostat_state != 'off' and target_temp != 'unknown' %}
+            The target temperature is {{ target_temp }} degrees.
+          {% endif %}
+        {% else %}
+          The thermostat status is currently unavailable.
+        {% endif %}
+      final_message: >-
+        {{ window_message }} {{ door_message }} {{ garage_message }} {{
+        thermostat_message }}
+  - data:
+      target: "{{ target_echo }}"
+      message: "{{ final_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
