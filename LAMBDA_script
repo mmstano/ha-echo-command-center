@@ -1,0 +1,118 @@
+import json
+import time
+import urllib3
+
+http = urllib3.PoolManager()
+
+WEBHOOK_URL = "https://(your public URL to home assistant)/api/webhook/(secret_webhook_id)"  # Replace with your actual webhook
+RETRY_COUNT = 3
+RETRY_DELAY = 1  # seconds
+
+def post_with_retry(url, payload):
+    for attempt in range(RETRY_COUNT):
+        try:
+            response = http.request(
+                "POST",
+                url,
+                body=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+                timeout=urllib3.Timeout(connect=2.0, read=5.0)
+            )
+            print(f"Webhook response status: {response.status}")
+            print(f"Webhook response body: {response.data.decode()}")
+            if response.status in [200, 201, 202]:
+                return True
+        except Exception as e:
+            print(f"Webhook post failed on attempt {attempt + 1}: {e}")
+        time.sleep(RETRY_DELAY)
+    return False
+
+def lambda_handler(event, context):
+    print("Event:", json.dumps(event))  # CloudWatch debugging
+
+    intent_name = event.get("request", {}).get("intent", {}).get("name", "")
+    allowed_intents = [
+        "HouseStatusIntent", "DoorStatusIntent", "WindowStatusIntent",
+        "LaundryStatusIntent", "WasherStatusIntent", "DryerStatusIntent",
+        "FamilyLocationIntent", "DadLocationIntent", "MomLocationIntent", "KidLocationIntent",
+        "GasPriceIntent",
+        "AddTodoItemIntent", "RemoveTodoItemIntent",
+        "AddTodoTaskIntent", "RemoveTodoTaskIntent"
+    ]
+
+    if event.get("request", {}).get("type") == "IntentRequest" and intent_name in allowed_intents:
+        response_text = "Processing your request."  # Default
+
+        if intent_name in ["AddTodoItemIntent", "RemoveTodoItemIntent",
+                           "AddTodoTaskIntent", "RemoveTodoTaskIntent"]:
+            item = event.get("request", {}).get("intent", {}).get("slots", {}).get("Item", {}).get("value", "")
+            if item:
+                payload = {
+                    "intent": intent_name,
+                    "item": item,
+                    "context": event.get("context", {}),
+                    "request": event.get("request", {}),
+                    "session": event.get("session", {}),
+                    "version": event.get("version", "1.0")
+                }
+                response_text_map = {
+                    "AddTodoItemIntent": f"Okay, I've added {item} to your shopping list.",
+                    "RemoveTodoItemIntent": f"Okay, I've removed {item} from your shopping list.",
+                    "AddTodoTaskIntent": f"Okay, I've added {item} to your task list.",
+                    "RemoveTodoTaskIntent": f"Okay, I've removed {item} from your task list."
+                }
+                response_text = response_text_map.get(intent_name, response_text)
+            else:
+                action = "add" if "Add" in intent_name else "remove"
+                target = "shopping list" if "Todo" in intent_name else "task list"
+                return {
+                    "version": "1.0",
+                    "response": {
+                        "outputSpeech": {
+                            "type": "PlainText",
+                            "text": f"Sorry, I didn't catch the item to {action} from your {target}.",
+                        },
+                        "shouldEndSession": True
+                    }
+                }
+        else:
+            payload = event
+            response_text = {
+                "HouseStatusIntent": "Checking your house status.",
+                "DoorStatusIntent": "Checking your door status.",
+                "WindowStatusIntent": "Checking your window status.",
+                "LaundryStatusIntent": "Checking your laundry status.",
+                "WasherStatusIntent": "Checking your washer status.",
+                "DryerStatusIntent": "Checking your dryer status.",
+                "FamilyLocationIntent": "Checking the family's location.",
+                "DadLocationIntent": "Checking dad's location.",
+                "MomLocationIntent": "Checking mom's location.",
+                "KidLocationIntent": "Checking the kid's location.",
+                "GasPriceIntent": "Checking gas prices."
+            }.get(intent_name, "Processing your request.")
+
+        success = post_with_retry(WEBHOOK_URL, payload)
+        time.sleep(1)  # Delay to prevent DB overload
+
+        return {
+            "version": "1.0",
+            "response": {
+                "outputSpeech": {
+                    "type": "PlainText",
+                    "text": response_text if success else "There was an issue processing your request.",
+                },
+                "shouldEndSession": True
+            }
+        }
+
+    # Fallback response
+    return {
+        "version": "1.0",
+        "response": {
+            "outputSpeech": {
+                "type": "PlainText",
+                "text": "Sorry, I didn't understand the request.",
+            },
+            "shouldEndSession": True
+        }
+    }
