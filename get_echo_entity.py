@@ -4,11 +4,11 @@ device_map = {
     "amzn1.ask.device.device_id_3": "media_player.family_room_fire_stick",
     "amzn1.ask.device.device_id_4": "media_player.main_bathroom_echo_flex",
     "amzn1.ask.device.device_id_5": "media_player.garage_echo_dot",
-    "amzn1.ask.device.device_id_6": "media_player.mere_s_echo_dot",
+    "amzn1.ask.device.device_id_6": "media_player.bedroom_1_echo_dot",
     "amzn1.ask.device.device_id_7": "media_player.basement_echo_dot_2",
     "amzn1.ask.device.device_id_8": "media_player.master_bedroom_echo_show",
     "amzn1.ask.device.device_id_9": "media_player.sunroom_echo_dot",
-    "amzn1.ask.device.device_id_10": "media_player.emma_s_echo_dot",
+    "amzn1.ask.device.device_id_10": "media_player.bedroom_2_echo_dot",
     "amzn1.ask.device.device_id_11": "media_player.family_room_echo_dot",
     "amzn1.ask.device.device_id_12": "media_player.my_fire_stick",
     "amzn1.ask.device.device_id_13": "media_player.living_room_fire_tv_cube"
