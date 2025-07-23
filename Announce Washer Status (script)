@@ -1,0 +1,38 @@
+alias: Announce Washer Status (Command Center)
+description: Announces the washer status based on MQTT sensors.
+mode: single
+sequence:
+  - variables:
+      washer_status: "{{ states('sensor.washer_status') }}"
+      washer_last_complete: "{{ states('sensor.washer_last_complete') }}"
+      washer_last_emptied: "{{ states('sensor.washer_last_emptied') }}"
+  - variables:
+      washer_message: |-
+        {% if washer_status == 'Running' %}
+          The washer is currently running.
+        {% elif washer_status == 'Complete' %}
+          The washer cycle completed at {{ washer_last_complete }}.
+        {% elif washer_status == 'Idle' %}
+          The washer is idle. It was last emptied at {{ washer_last_emptied }}.
+        {% else %}
+          The washer status is currently unknown.
+        {% endif %}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: "{{ washer_message }}"
+    target:
+      entity_id: "{{ states('sensor.echo_target') }}"
+  - data:
+      target: "{{ states('sensor.echo_target') }}"
+      message: "{{ washer_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
