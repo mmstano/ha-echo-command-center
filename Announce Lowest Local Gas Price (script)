@@ -1,0 +1,33 @@
+alias: Announce Lowest Local Gas Price (Command Center)
+description: Announces the cheapest gas station and price to the last used Echo device.
+mode: single
+sequence:
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+      station_name: "{{ states('sensor.cheapest_gas_station') }}"
+      station_address: "{{ states('sensor.cheapest_gas_station_address') }}"
+      gas_price: "{{ states('sensor.cheapest_gas_price') | float(0) }}"
+      message: |
+        {% if station_name and station_address and gas_price > 0 %}
+          The cheapest gas is {{ station_name }} at {{ station_address }} for ${{ '%.2f' | format(gas_price) }} per gallon.
+        {% else %}
+          No valid gas price information is currently available.
+        {% endif %}
+  - delay: "00:00:01"
+  - data:
+      message: "{{ message }}"
+    target:
+      entity_id: "{{ target_echo }}"
+    action: notify.send_message
+  - data:
+      target: "{{ target_echo }}"
+      message: "{{ message }}"
+      data:
+        type: announce
+        method: all
+    enabled: false
+    action: notify.alexa_media
