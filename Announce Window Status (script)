@@ -1,0 +1,47 @@
+alias: Announce Window Status (Command Center)
+description: Announces window status automatically to the Echo you spoke to.
+mode: single
+fields: {}
+sequence:
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+      windows_to_check:
+        - binary_sensor.living_room_window_1_sensor
+        - binary_sensor.living_room_window_2
+        - binary_sensor.living_room_window_3
+        - binary_sensor.dining_room_window_1
+        - binary_sensor.dining_room_window_2
+        - binary_sensor.kitchen_window
+        - binary_sensor.bedroom_1_window_sensor
+        - binary_sensor.bedroom_2_1st_window
+        - binary_sensor.bedroom_2_2nd_window
+      open_windows: >
+        {% set open = windows_to_check | select('is_state', 'on') |
+        map('device_attr', 'name') | list %} {{ open }}
+      window_message: |-
+        {% if open_windows | length == 1 %}
+          The following window is open: {{ open_windows[0] }}.
+        {% elif open_windows %}
+          The following windows are open: {{ open_windows | join(", ") }}.
+        {% else %}
+          All windows are currently closed.
+        {% endif %}
+  - delay: "00:00:01"
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: "{{ window_message }}"
+    target:
+      entity_id: "{{ target_echo }}"
+  - data:
+      target: "{{ target_echo }}"
+      message: "{{ window_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
