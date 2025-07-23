@@ -1,21 +1,21 @@
 device_map = {
-    "amzn1.ask.device.device_id_1": "media_player.kitchen_echo_show",
-    "amzn1.ask.device.device_id_2": "media_player.basement_echo_dot_1",
-    "amzn1.ask.device.device_id_3": "media_player.family_room_fire_stick",
-    "amzn1.ask.device.device_id_4": "media_player.main_bathroom_echo_flex",
-    "amzn1.ask.device.device_id_5": "media_player.garage_echo_dot",
-    "amzn1.ask.device.device_id_6": "media_player.bedroom_1_echo_dot",
-    "amzn1.ask.device.device_id_7": "media_player.basement_echo_dot_2",
-    "amzn1.ask.device.device_id_8": "media_player.master_bedroom_echo_show",
-    "amzn1.ask.device.device_id_9": "media_player.sunroom_echo_dot",
-    "amzn1.ask.device.device_id_10": "media_player.bedroom_2_echo_dot",
-    "amzn1.ask.device.device_id_11": "media_player.family_room_echo_dot",
-    "amzn1.ask.device.device_id_12": "media_player.my_fire_stick",
-    "amzn1.ask.device.device_id_13": "media_player.living_room_fire_tv_cube"
+    "amzn1.ask.device.device_id_1": "notify.kitchen_echo_show_speak",
+    "amzn1.ask.device.device_id_2": "notify.basement_echo_dot_1_speak",
+    "amzn1.ask.device.device_id_3": "notify.family_room_fire_stick_speak",
+    "amzn1.ask.device.device_id_4": "notify.main_bathroom_echo_flex_speak",
+    "amzn1.ask.device.device_id_5": "notify.garage_echo_dot_speak",
+    "amzn1.ask.device.device_id_6": "notify.bedroom_1_echo_dot_speak",
+    "amzn1.ask.device.device_id_7": "notify.basement_echo_dot_2_speak",
+    "amzn1.ask.device.device_id_8": "notify.master_bedroom_echo_show_speak",
+    "amzn1.ask.device.device_id_9": "notify.sunroom_echo_dot_speak",
+    "amzn1.ask.device.device_id_10": "notify.bedroom_2_echo_dot_speak",
+    "amzn1.ask.device.device_id_11": "notify.family_room_echo_dot_speak",
+    "amzn1.ask.device.device_id_12": "notify.my_fire_stick_speak",
+    "amzn1.ask.device.device_id_13": "notify.living_room_fire_tv_cube_speak"
 }
 
 device_id = data.get("device_id", "")
-entity_id = device_map.get(device_id, "media_player.kitchen_echo_show")
+entity_id = device_map.get(device_id, "notify.kitchen_echo_show_speak")
 
 # Only update if needed
 current_value = hass.states.get("input_text.alexa_last_device")
