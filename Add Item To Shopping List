@@ -1,0 +1,34 @@
+alias: Add Item To Shopping List (Command Center)
+description: >
+  Captures the to-do item from Alexa, stores it in input_text, and adds it to
+  the shopping list.
+mode: single
+fields: {}
+sequence:
+  - variables:
+      item_text: "{{ payload.item | title | default('') }}"
+  - condition: template
+    value_template: "{{ item_text != '' }}"
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+  - data:
+      value: "{{ item_text }}"
+    action: input_text.set_value
+    target:
+      entity_id:
+        - input_text.shopping_item_captured
+  - action: shopping_list.add_item
+    data:
+      name: "{{ item_text }}"
+  - data:
+      target: "{{ target_echo }}"
+      message: Okay, I've added {{ item_text }} to your shopping list.
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
