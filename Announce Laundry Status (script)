@@ -1,0 +1,53 @@
+alias: Announce Laundry Status (Command Center)
+description: Announces the laundry status to the Echo you spoke to.
+mode: single
+sequence:
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+      washer_status: "{{ states('sensor.washer_status') }}"
+      dryer_status: "{{ states('sensor.dryer_status') }}"
+      washer_last_complete: "{{ states('sensor.washer_last_complete') }}"
+      washer_last_emptied: "{{ states('sensor.washer_last_emptied') }}"
+      dryer_last_complete: "{{ states('sensor.dryer_last_complete') }}"
+      dryer_last_emptied: "{{ states('sensor.dryer_last_emptied') }}"
+  - variables:
+      washer_message: |-
+        {% if washer_status == 'Running' %}
+          The washer is currently running.
+        {% elif washer_status == 'Complete' %}
+          The washer cycle completed at {{ washer_last_complete }}.
+        {% elif washer_status == 'Idle' %}
+          The washer was last emptied at {{ washer_last_emptied }}.
+        {% else %}
+          The washer status is currently unknown.
+        {% endif %}
+      dryer_message: |-
+        {% if dryer_status == 'Running' %}
+          The dryer is currently running.
+        {% elif dryer_status == 'Complete' %}
+          The dryer cycle completed at {{ dryer_last_complete }}.
+        {% elif dryer_status == 'Idle' %}
+          The dryer was last emptied at {{ dryer_last_emptied }}.
+        {% else %}
+          The dryer status is currently unknown.
+        {% endif %}
+      final_message: "{{ washer_message }} {{ dryer_message }}"
+  - delay: "00:00:01"
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: "{{ final_message }}"
+    target:
+      entity_id: "{{ target_echo }}"
+  - data:
+      target: "{{ target_echo }}"
+      message: "{{ final_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
