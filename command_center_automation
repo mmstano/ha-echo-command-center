@@ -207,7 +207,7 @@ actions:
               minutes: 0
               seconds: 1
               milliseconds: 0
-          - action: script.announce_emma_s_location_command_center
+          - action: script.announce_kids_location_command_center
             data: {}
       - conditions:
           - condition: template
