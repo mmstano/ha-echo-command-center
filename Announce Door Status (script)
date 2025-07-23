@@ -1,0 +1,45 @@
+alias: Announce Door Status (Command Center)
+description: Announces door status automatically to the Echo you spoke to.
+mode: single
+fields: {}
+sequence:
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+      doors_to_check:
+        - binary_sensor.front_door
+        - binary_sensor.family_room_door
+        - binary_sensor.sunroom
+        - binary_sensor.basement
+        - binary_sensor.refrigerator_door
+        - binary_sensor.garage_freezer_contact_sensor_contact
+        - binary_sensor.dryer_door_contact
+      open_doors: >
+        {% set open = doors_to_check | select('is_state', 'on') |
+        map('device_attr', 'name') | list %} {{ open }}
+      door_message: |-
+        {% if open_doors | length == 1 %}
+          The following door is open: {{ open_doors[0] }}.
+        {% elif open_doors %}
+          The following doors are open: {{ open_doors | join(", ") }}.
+        {% else %}
+          All doors are currently closed.
+        {% endif %}
+  - delay: "00:00:01"
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: "{{ door_message }}"
+    target:
+      entity_id: "{{ target_echo }}"
+  - data:
+      target: "{{ target_echo }}"
+      message: "{{ door_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
