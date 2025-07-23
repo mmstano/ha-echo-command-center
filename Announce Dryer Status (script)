@@ -1,0 +1,38 @@
+alias: Announce Dryer Status (Command Center)
+description: Announces the dryer status based on MQTT sensors.
+mode: single
+sequence:
+  - variables:
+      dryer_status: "{{ states('sensor.dryer_status') }}"
+      dryer_last_complete: "{{ states('sensor.dryer_last_complete') }}"
+      dryer_last_emptied: "{{ states('sensor.dryer_last_emptied') }}"
+  - variables:
+      dryer_message: |-
+        {% if dryer_status == 'Running' %}
+          The dryer is currently running.
+        {% elif dryer_status == 'Complete' %}
+          The dryer cycle completed at {{ dryer_last_complete }}.
+        {% elif dryer_status == 'Idle' %}
+          The dryer is idle. It was last emptied at {{ dryer_last_emptied }}.
+        {% else %}
+          The dryer status is currently unknown.
+        {% endif %}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 2
+      milliseconds: 0
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: "{{ dryer_message }}"
+    target:
+      entity_id: "{{ states('sensor.echo_target') }}"
+  - data:
+      target: "{{ states('sensor.echo_target') }}"
+      message: "{{ dryer_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
