@@ -1,0 +1,36 @@
+sequence:
+  - variables:
+      item_text: "{{ payload.item | title | default('') }}"
+  - condition: template
+    value_template: "{{ item_text != '' }}"
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+  - data:
+      value: "{{ item_text }}"
+    action: input_text.set_value
+    target:
+      entity_id:
+        - input_text.task_item_captured
+  - action: todo.add_item
+    target:
+      entity_id: todo.to_do
+    data:
+      item: "{{ item_text }}"
+  - data:
+      target: "{{ target_echo }}"
+      message: Okay, I've added {{ item_text }} to your task list.
+      data:
+        type: tts
+        method: all
+    action: notify.alexa_media
+    enabled: false
+alias: Add Task To Task List (Command Center)
+description: >
+  Captures the to-do item from Alexa, stores it in input_text, and adds it to
+  the task list.
+mode: single
+fields: {}
