@@ -1,0 +1,44 @@
+alias: Announce Dad's Location (Command Center)
+description: >-
+  Announces Dad's location based on Home Assistant zones, or if Dad is marked
+  as away, uses geocoded location.
+mode: single
+fields: {}
+sequence:
+  - data:
+      device_id: "{{ states('input_text.alexa_last_device') }}"
+    action: python_script.get_echo_entity
+  - delay: "00:00:01"
+  - variables:
+      target_echo: "{{ states('sensor.echo_target') }}"
+      person_state: "{{ states('person.dad') }}"
+      geocode: "{{ states('sensor.dads_iphone_12_geocoded_location') }}"
+      location_message: |
+        {% if person_state != 'not_home' %}
+          {% if person_state == 'Warehouse' %}
+            Dad is at work.
+          {% else %}
+            Dad is at {{ person_state }}.
+          {% endif %}
+        {% else %}
+          {% if geocode not in ['unknown', 'unavailable'] %}
+            Matt is at {{ geocode }}.
+          {% else %}
+            Dad's location is currently unknown.
+          {% endif %}
+        {% endif %}
+  - delay: "00:00:01"
+  - action: notify.send_message
+    metadata: {}
+    data:
+      message: "{{ location_message }}"
+    target:
+      entity_id: "{{ target_echo }}"
+  - data:
+      target: "{{ target_echo }}"
+      message: "{{ location_message }}"
+      data:
+        type: announce
+        method: all
+    action: notify.alexa_media
+    enabled: false
