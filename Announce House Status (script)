@@ -18,9 +18,9 @@ sequence:
         - binary_sensor.dining_room_window_1
         - binary_sensor.dining_room_window_2
         - binary_sensor.kitchen_window
-        - binary_sensor.meres_window_sensor
-        - binary_sensor.emma_1st_window
-        - binary_sensor.emma_2nd_window
+        - binary_sensor.bedroom_1_window_sensor
+        - binary_sensor.bedroom_2_1st_window
+        - binary_sensor.bedroom_2_2nd_window
       doors_to_check:
         - binary_sensor.front_door
         - binary_sensor.family_room_door
