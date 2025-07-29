@@ -22,7 +22,7 @@ sequence:
           {% endif %}
         {% else %}
           {% if geocode not in ['unknown', 'unavailable'] %}
-            Matt is at {{ geocode }}.
+            Dad is at {{ geocode }}.
           {% else %}
             Dad's location is currently unknown.
           {% endif %}
